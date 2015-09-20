@@ -7,9 +7,12 @@ module Hasio.Application
     , Application(..), runApplication
     ) where
 
-newtype Key = Key { codeFromKey :: Int }
+import UI.NCurses
+import Control.Monad
 
-nameFromKey :: Key -> Maybe String
+newtype AppKey = Key { codeFromKey :: Int }
+
+nameFromKey :: AppKey -> Maybe String
 nameFromKey key = Nothing
 
 newtype Display = Display { stringsFromDisplay :: [String] }
@@ -19,13 +22,31 @@ displayFromStrings strings =
     Display . take 7 $ fmap normalString strings ++ repeat (replicate 21 ' ')
     where normalString = take 21 . (++ repeat ' ')
 
-data Event =
+data AppEvent =
     TickEvent Float
     | KeyEvent Key
 
 data Application s = Application
     { displayApp :: s -> Display
-    , incrementApp :: s -> Event -> Maybe s }
+    , incrementApp :: s -> AppEvent -> Maybe s }
 
 runApplication :: Application s -> IO ()
-runApplication = undefined
+runApplication app = runCurses $ do
+    setEcho False
+    w <- defaultWindow
+    updateWindow w $ do
+        moveCursor 1 10
+        drawString "Hello world!"
+        moveCursor 3 10
+        drawString "(press q to quit)"
+        moveCursor 0 0
+    render
+    waitFor w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
+
+waitFor :: Window -> (Event -> Bool) -> Curses ()
+waitFor w p = loop where
+    loop = do
+        ev <- getEvent w Nothing
+        case ev of
+            Nothing -> loop
+            Just ev' -> unless (p ev') loop

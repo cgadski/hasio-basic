@@ -26,5 +26,4 @@ data Command =
 
     | AssignVar Expr NumVar
 
-
 type Program = [Command]

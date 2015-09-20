@@ -7,6 +7,13 @@
   (major1) == 4 && (major2) <  8 || \
   (major1) == 4 && (major2) == 8 && (minor) <= 1)
 
+/* package ncurses-0.2.11 */
+#define VERSION_ncurses "0.2.11"
+#define MIN_VERSION_ncurses(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  2 || \
+  (major1) == 0 && (major2) == 2 && (minor) <= 11)
+
 /* tool cpphs-1.19.3 */
 #define TOOL_VERSION_cpphs "1.19.3"
 #define MIN_TOOL_VERSION_cpphs(major1,major2,minor) (\
@@ -56,5 +63,5 @@
   (major1) == 0 && (major2) <  67 || \
   (major1) == 0 && (major2) == 67 && (minor) <= 0)
 
-#define CURRENT_PACKAGE_KEY "hasio_0Qxycgf11HX67gyyg84syp"
+#define CURRENT_PACKAGE_KEY "hasio_2MXaTC9hEZg1zfTCXXUUHu"
 
