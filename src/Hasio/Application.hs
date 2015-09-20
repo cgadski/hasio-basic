@@ -2,8 +2,8 @@
 -- holds the functionality we can expect from a casio BASIC program and can
 -- be executed via an ncurses interface.
 module Hasio.Application
-    ( Key(..), nameFromKey
-    , Display(..), displayFromStrings
+    ( AppKey(..), nameFromKey
+    , AppDisplay(..), displayFromStrings
     , Application(..), runApplication
     ) where
 
@@ -15,11 +15,11 @@ newtype AppKey = Key { codeFromKey :: Int }
 nameFromKey :: AppKey -> Maybe String
 nameFromKey key = Nothing
 
-newtype Display = Display { stringsFromDisplay :: [String] }
+newtype AppDisplay = AppDisplay { stringsFromAppDisplay :: [String] }
 
-displayFromStrings :: [String] -> Display
+displayFromStrings :: [String] -> AppDisplay
 displayFromStrings strings =
-    Display . take 7 $ fmap normalString strings ++ repeat (replicate 21 ' ')
+    AppDisplay . take 7 $ fmap normalString strings ++ repeat (replicate 21 ' ')
     where normalString = take 21 . (++ repeat ' ')
 
 data AppEvent =
@@ -27,24 +27,26 @@ data AppEvent =
     | KeyEvent Key
 
 data Application s = Application
-    { displayApp :: s -> Display
+    { initialApp :: s
+    , displayApp :: s -> AppDisplay
     , incrementApp :: s -> AppEvent -> Maybe s }
+
+updateFromDisplay :: AppDisplay -> Update ()
+updateFromDisplay (AppDisplay strings) =
+    mapM_ (\i ->
+        moveCursor 1 i >> drawString (strings !! fromIntegral i))
+        [0..6]
 
 runApplication :: Application s -> IO ()
 runApplication app = runCurses $ do
     setEcho False
     w <- defaultWindow
-    updateWindow w $ do
-        moveCursor 1 10
-        drawString "Hello world!"
-        moveCursor 3 10
-        drawString "(press q to quit)"
-        moveCursor 0 0
+    updateWindow w $ updateFromDisplay (displayApp app $ initialApp app)
     render
-    waitFor w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
+    handleEvents w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
 
-waitFor :: Window -> (Event -> Bool) -> Curses ()
-waitFor w p = loop where
+handleEvents :: Window -> (Event -> Bool) -> Curses ()
+handleEvents w p = loop where
     loop = do
         ev <- getEvent w Nothing
         case ev of

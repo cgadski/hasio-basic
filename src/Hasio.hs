@@ -8,5 +8,6 @@ import Hasio.Application
 testApplication :: Application ()
 testApplication =
     Application
-        { displayApp = return $ displayFromStrings ["hello world"]
+        { initialApp = undefined
+        , displayApp = return $ displayFromStrings ["hello world"]
         , incrementApp = return . Just }
