@@ -7,7 +7,6 @@ import Hasio.Application
 
 testApplication :: Application ()
 testApplication =
-    Application {
-        displayApp = return $ displayFromStrings ["hello world"],
-        incrementApp = return . Just
-    }
+    Application
+        { displayApp = return $ displayFromStrings ["hello world"]
+        , incrementApp = return . Just }
