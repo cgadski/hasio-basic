@@ -14,6 +14,13 @@
   (major1) == 0 && (major2) <  2 || \
   (major1) == 0 && (major2) == 2 && (minor) <= 11)
 
+/* package transformers-0.4.2.0 */
+#define VERSION_transformers "0.4.2.0"
+#define MIN_VERSION_transformers(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  4 || \
+  (major1) == 0 && (major2) == 4 && (minor) <= 2)
+
 /* tool cpphs-1.19.3 */
 #define TOOL_VERSION_cpphs "1.19.3"
 #define MIN_TOOL_VERSION_cpphs(major1,major2,minor) (\
@@ -63,5 +70,12 @@
   (major1) == 0 && (major2) <  67 || \
   (major1) == 0 && (major2) == 67 && (minor) <= 0)
 
-#define CURRENT_PACKAGE_KEY "hasio_2MXaTC9hEZg1zfTCXXUUHu"
+/* tool hscolour-1.22 */
+#define TOOL_VERSION_hscolour "1.22"
+#define MIN_TOOL_VERSION_hscolour(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  22 || \
+  (major1) == 1 && (major2) == 22 && (minor) <= 0)
+
+#define CURRENT_PACKAGE_KEY "hasio_FghKuMnuTCw9rxYRuWz4VI"
 

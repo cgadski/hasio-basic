@@ -9,8 +9,10 @@ module Hasio.Application
 
 import UI.NCurses
 import Control.Monad
+import Control.Concurrent
+import Control.Monad.IO.Class
 
-newtype AppKey = Key { codeFromKey :: Int }
+newtype AppKey = AppKey { codeFromKey :: Int }
 
 nameFromKey :: AppKey -> Maybe String
 nameFromKey key = Nothing
@@ -24,12 +26,12 @@ displayFromStrings strings =
 
 data AppEvent =
     TickEvent Float
-    | KeyEvent Key
+    | KeyEvent AppKey
 
 data Application s = Application
     { initialApp :: s
     , displayApp :: s -> AppDisplay
-    , incrementApp :: s -> AppEvent -> Maybe s }
+    , incrementApp :: AppEvent -> s -> Maybe s }
 
 updateFromDisplay :: AppDisplay -> Update ()
 updateFromDisplay (AppDisplay strings) =
@@ -44,6 +46,22 @@ runApplication app = runCurses $ do
     updateWindow w $ updateFromDisplay (displayApp app $ initialApp app)
     render
     handleEvents w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
+
+appLoop :: Window -> Application s -> s -> Curses ()
+appLoop window app state = do
+    updateWindow window . updateFromDisplay $ displayApp app state
+    event <- getEvent window Nothing
+    let
+        mutateEvent = case event of
+            Nothing -> return
+            Just event ->
+                case event of
+                    EventCharacter char ->
+                        incrementApp app (KeyEvent (AppKey 1))
+                    _ -> return
+        mutateDelay = incrementApp app (TickEvent 1)
+    liftIO $ threadDelay 15
+    forM_ (mutateEvent =<< mutateDelay state) $ appLoop window app
 
 handleEvents :: Window -> (Event -> Bool) -> Curses ()
 handleEvents w p = loop where

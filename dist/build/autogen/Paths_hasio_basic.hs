@@ -17,7 +17,7 @@ version = Version [0,1,0,0] []
 bindir, libdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/magneticduck/.cabal/bin"
-libdir     = "/home/magneticduck/.cabal/lib/x86_64-linux-ghc-7.10.2/hasio-basic-0.1.0.0-2MXaTC9hEZg1zfTCXXUUHu"
+libdir     = "/home/magneticduck/.cabal/lib/x86_64-linux-ghc-7.10.2/hasio-basic-0.1.0.0-FghKuMnuTCw9rxYRuWz4VI"
 datadir    = "/home/magneticduck/.cabal/share/x86_64-linux-ghc-7.10.2/hasio-basic-0.1.0.0"
 libexecdir = "/home/magneticduck/.cabal/libexec"
 sysconfdir = "/home/magneticduck/.cabal/etc"
