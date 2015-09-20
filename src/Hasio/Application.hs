@@ -21,7 +21,7 @@ newtype AppDisplay = AppDisplay { stringsFromAppDisplay :: [String] }
 
 displayFromStrings :: [String] -> AppDisplay
 displayFromStrings strings =
-    AppDisplay . take 7 $ fmap normalString strings ++ repeat (replicate 21 ' ')
+    AppDisplay . take 7 $ fmap normalString strings ++ repeat ""
     where normalString = take 21 . (++ repeat ' ')
 
 data AppEvent =
@@ -35,21 +35,23 @@ data Application s = Application
 
 updateFromDisplay :: AppDisplay -> Update ()
 updateFromDisplay (AppDisplay strings) =
-    mapM_ (\i ->
-        moveCursor 1 i >> drawString (strings !! fromIntegral i))
-        [0..6]
+    flip (>>) (moveCursor 0 0) $
+        mapM_ (\i ->
+            moveCursor 1 (i + 1) >> drawString (strings !! fromIntegral i))
+            [0..6]
 
 runApplication :: Application s -> IO ()
 runApplication app = runCurses $ do
     setEcho False
-    w <- defaultWindow
-    updateWindow w $ updateFromDisplay (displayApp app $ initialApp app)
-    render
-    handleEvents w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
+    defaultWindow >>= appLoop app (initialApp app)
+    -- updateWindow w $ updateFromDisplay (displayApp app $ initialApp app)
+    -- render
+    -- handleEvents w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
 
-appLoop :: Window -> Application s -> s -> Curses ()
-appLoop window app state = do
+appLoop :: Application s -> s -> Window -> Curses ()
+appLoop app state window = do
     updateWindow window . updateFromDisplay $ displayApp app state
+    render
     event <- getEvent window Nothing
     let
         mutateEvent = case event of
@@ -61,7 +63,7 @@ appLoop window app state = do
                     _ -> return
         mutateDelay = incrementApp app (TickEvent 1)
     liftIO $ threadDelay 15
-    forM_ (mutateEvent =<< mutateDelay state) $ appLoop window app
+    forM_ (mutateEvent =<< mutateDelay state) $ flip (appLoop app) window
 
 handleEvents :: Window -> (Event -> Bool) -> Curses ()
 handleEvents w p = loop where

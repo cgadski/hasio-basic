@@ -9,5 +9,5 @@ testApplication :: Application ()
 testApplication =
     Application
         { initialApp = undefined
-        , displayApp = return $ displayFromStrings ["hello world"]
-        , incrementApp = return . Just }
+        , displayApp = return $ displayFromStrings ["hello world aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+        , incrementApp = const Just }
