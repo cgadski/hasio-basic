@@ -56,7 +56,7 @@ keyData =
                 { nameFromKeyData = head $ words str
                 , casioCodeFromKeyData = read $ words str !! 1
                 , ncursesPredFromKeyData =
-                    case words str !! 3 of
+                    case words str !! 2 of
                         "char" -> eventIsChar (head $ words str !! 3)
                         _ -> eventIsSpecial (words str !! 2)
                 }
