@@ -2,22 +2,20 @@
 -- holds the functionality we can expect from a casio BASIC program and can
 -- be executed via an ncurses interface.
 module Hasio.Application
-    ( AppKey(..), nameFromKey
+    ( module Hasio.Application.Key
     , AppEvent(..)
     , AppDisplay(..), displayFromStrings
     , Application(..)
     , runApplication
     ) where
 
+import Hasio.Application.Key
+
+import Data.List
 import UI.NCurses
 import Control.Monad
 import Control.Concurrent
 import Control.Monad.IO.Class
-
-newtype AppKey = AppKey { codeFromKey :: Int }
-
-nameFromKey :: AppKey -> Maybe String
-nameFromKey key = Nothing
 
 data AppEvent =
     TickEvent Float
@@ -57,17 +55,15 @@ appLoop :: Application s -> s -> Window -> Curses ()
 appLoop app state window = do
     updateWindow window . updateFromDisplay $ displayApp app state
     render
-    -- event <- getEvent window Nothing
-    let event = Nothing
+    event <- getEvent window (Just 0)
     let
         mutateEvent = case event of
             Nothing -> return
             Just event ->
-                case event of
-                    EventCharacter char ->
-                        incrementApp app (KeyEvent (AppKey 1))
+                case keyFromEvent event of
+                    Just appKey -> incrementApp app (KeyEvent appKey)
                     _ -> return
-        mutateDelay = incrementApp app (TickEvent 1)
+        mutateDelay = incrementApp app (TickEvent 15)
     liftIO $ threadDelay 15
     forM_ (mutateEvent =<< mutateDelay state) $
         flip (appLoop app) window

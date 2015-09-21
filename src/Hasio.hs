@@ -5,17 +5,19 @@ module Hasio
 
 import Hasio.Application
 
-data TestState = TestState { getCounter :: Int }
+data TestState = TestState { getKey :: Int }
 
 initState :: TestState
 initState = TestState 1
 
 displayState :: TestState -> AppDisplay
-displayState = displayFromStrings . (:[]) . show . getCounter
+displayState = displayFromStrings . (:[]) . show . getKey
 
 incrementState :: AppEvent -> TestState -> Maybe TestState
-incrementState event (TestState counter) =
-    Just $ TestState $ counter + 1
+incrementState event state@(TestState key) =
+    case event of
+        KeyEvent key -> Just $ TestState (casioCodeFromKey key)
+        _ -> Just state
 
 testApplication :: Application TestState
 testApplication =
