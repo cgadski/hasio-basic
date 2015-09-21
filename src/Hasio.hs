@@ -5,9 +5,21 @@ module Hasio
 
 import Hasio.Application
 
-testApplication :: Application ()
+data TestState = TestState { getCounter :: Int }
+
+initState :: TestState
+initState = TestState 1
+
+displayState :: TestState -> AppDisplay
+displayState = displayFromStrings . (:[]) . show . getCounter
+
+incrementState :: AppEvent -> TestState -> Maybe TestState
+incrementState event (TestState counter) =
+    Just $ TestState $ counter + 1
+
+testApplication :: Application TestState
 testApplication =
     Application
-        { initialApp = undefined
-        , displayApp = return $ displayFromStrings ["hello world aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
-        , incrementApp = const Just }
+        { initialApp = initState
+        , displayApp = displayState
+        , incrementApp = incrementState }

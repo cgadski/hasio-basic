@@ -1,10 +1,10 @@
 module Main (main) where
 
-import           Hasio
+import Hasio
 
-import           Control.Applicative
-import           Data.Char
-import           System.Environment
+import Control.Applicative
+import Data.Char
+import System.Environment
 
 data InvocationType =
     HelpInvoke

@@ -3,8 +3,10 @@
 -- be executed via an ncurses interface.
 module Hasio.Application
     ( AppKey(..), nameFromKey
+    , AppEvent(..)
     , AppDisplay(..), displayFromStrings
-    , Application(..), runApplication
+    , Application(..)
+    , runApplication
     ) where
 
 import UI.NCurses
@@ -17,16 +19,16 @@ newtype AppKey = AppKey { codeFromKey :: Int }
 nameFromKey :: AppKey -> Maybe String
 nameFromKey key = Nothing
 
+data AppEvent =
+    TickEvent Float
+    | KeyEvent AppKey
+
 newtype AppDisplay = AppDisplay { stringsFromAppDisplay :: [String] }
 
 displayFromStrings :: [String] -> AppDisplay
 displayFromStrings strings =
     AppDisplay . take 7 $ fmap normalString strings ++ repeat ""
     where normalString = take 21 . (++ repeat ' ')
-
-data AppEvent =
-    TickEvent Float
-    | KeyEvent AppKey
 
 data Application s = Application
     { initialApp :: s
@@ -35,24 +37,28 @@ data Application s = Application
 
 updateFromDisplay :: AppDisplay -> Update ()
 updateFromDisplay (AppDisplay strings) =
-    flip (>>) (moveCursor 0 0) $
-        mapM_ (\i ->
-            moveCursor 1 (i + 1) >> drawString (strings !! fromIntegral i))
-            [0..6]
+    foldr1 (>>) [ myBorder, drawContents, moveCursor 0 0 ]
+    where
+        drawContents =
+            forM_ [0..6] (\i ->
+                moveCursor (i + 1) 1 >>
+                    drawString (strings !! fromIntegral i))
+        myBorder = mapM_ drawEdge [0, 7] >> mapM_ drawDelim [1..6]
+        drawEdge y = moveCursor y 0 >> drawString (replicate 23 '-')
+        drawDelim y = moveCursor y 0 >>
+            drawString (concat ["|", replicate 21 ' ', "|"])
 
 runApplication :: Application s -> IO ()
 runApplication app = runCurses $ do
     setEcho False
     defaultWindow >>= appLoop app (initialApp app)
-    -- updateWindow w $ updateFromDisplay (displayApp app $ initialApp app)
-    -- render
-    -- handleEvents w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
 
 appLoop :: Application s -> s -> Window -> Curses ()
 appLoop app state window = do
     updateWindow window . updateFromDisplay $ displayApp app state
     render
-    event <- getEvent window Nothing
+    -- event <- getEvent window Nothing
+    let event = Nothing
     let
         mutateEvent = case event of
             Nothing -> return
@@ -63,7 +69,8 @@ appLoop app state window = do
                     _ -> return
         mutateDelay = incrementApp app (TickEvent 1)
     liftIO $ threadDelay 15
-    forM_ (mutateEvent =<< mutateDelay state) $ flip (appLoop app) window
+    forM_ (mutateEvent =<< mutateDelay state) $
+        flip (appLoop app) window
 
 handleEvents :: Window -> (Event -> Bool) -> Curses ()
 handleEvents w p = loop where
