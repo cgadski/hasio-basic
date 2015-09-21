@@ -92,18 +92,5 @@ eventPredFromKey = ncursesPredFromKeyData . keyDataFromKey
 casioCodeFromKey :: AppKey -> Int
 casioCodeFromKey = casioCodeFromKeyData . keyDataFromKey
 
-
--- casioCodeFromKey :: AppKey -> Int
--- casioCodeFromKey (Key code) = code
---
--- desktopCodeFromKey :: AppKey -> Int
--- desktopCodeFromKey (Key code) =
---
--- instance Show AppKey where
---     show key =
---         case fst <$> find ((== key) . snd) keyNames of
---             Just str -> "<key " ++ str ++ ">"
---             Nothing -> "<key>"
-
 instance Show AppKey where
     show = nameFromKeyData . keyDataFromKey
